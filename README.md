@@ -1,4 +1,45 @@
-# aioNanoleaf package 
+**Using this repo temporarily to fix Home Assistant IPv6 connectivity issues:**
+
+```sh
+mkdir -p /etc/cont-init.d
+cat <<EOF > /etc/cont-init.d/00-replace-aionanoleaf-ipv6.sh
+#!/usr/bin/with-contenv bashio
+uv pip install --force-reinstall git+https://github.com/janw/aionanoleaf.git
+EOF
+```
+
+**If you're running HA in kubernetes:**
+
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homeassistant-custom-init
+data:
+  00-replace-aionanoleaf-ipv6.sh: |
+    #!/usr/bin/with-contenv bashio
+    uv pip install --force-reinstall git+https://github.com/janw/aionanoleaf.git
+
+---
+# On the deployment/statefulset:
+# …
+          volumeMounts:
+            - mountPath: /etc/cont-init.d
+              name: homeassistant-custom-init
+
+# …
+      volumes:
+        - name: homeassistant-custom-init
+          configMap:
+            name: homeassistant-custom-init
+            defaultMode: 0777
+```
+
+----
+
+# aioNanoleaf package
+
 [![PyPI](https://img.shields.io/pypi/v/aionanoleaf)](https://pypi.org/project/aionanoleaf/) ![PyPI - Downloads](https://img.shields.io/pypi/dm/aionanoleaf) [![PyPI - License](https://img.shields.io/pypi/l/aionanoleaf?color=blue)](https://github.com/milanmeu/aionanoleaf/blob/main/COPYING)
 
 An async Python wrapper for the Nanoleaf API.
