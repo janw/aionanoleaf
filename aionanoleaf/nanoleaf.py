@@ -70,6 +70,9 @@ class Nanoleaf:
     ) -> None:
         """Initialize the Nanoleaf."""
         self._session = session
+        self._raw_host = host  # unmodified host for datagram (L3) protocol
+        if ':' in host and not host.startswith('['):
+            host = f"[{host}]"
         self._host = host
         self._auth_token = auth_token
         self._port = port
@@ -412,8 +415,8 @@ class Nanoleaf:
         if local_port is None:
             local_port = 0
         loop = asyncio.get_running_loop()
-        transport, protocol = await loop.create_datagram_endpoint(
-            lambda: _NanoleafTouchProtocol(self.host, callback),
+        transport, _ = await loop.create_datagram_endpoint(
+            lambda: _NanoleafTouchProtocol(self._raw_host, callback),
             local_addr=(local_ip, local_port),
         )
         touch_socket: socket.socket = transport.get_extra_info("socket")
